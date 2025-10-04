@@ -1,0 +1,66 @@
+{
+  // define "user.spelunky2.path" in user settings.json
+  // TODO Hot reload the mod using the Overlunky scripts tab
+  "tasks": [
+    {
+      "label": "Install",
+      "detail": "Copy files into mods folder",
+      "icon": {
+        "id": "copy",
+        "color": "terminal.ansiGreen",
+      },
+      "presentation": {
+        "echo": false,
+        "reveal": "never",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false,
+      },
+      "group": "build",
+      "type": "shell",
+      "linux": {
+        "command": "cp",
+        "args": [
+          "-a",
+          "${workspaceFolder}/source/.",
+          "${config:user.spelunky2.path}/Mods/Packs/Stop-hitting-each-other",
+        ],
+      },
+    },
+    {
+      "label": "Launch",
+      "detail": "Start Spelunky 2",
+      "icon": {
+        "id": "game",
+        "color": "terminal.ansiGreen",
+      },
+      "presentation": {
+        "echo": false,
+        "reveal": "never",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false,
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+      "dependsOn": [
+        "Install",
+      ],
+      "type": "shell",
+      "linux": {
+        "command": "powershell.exe",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/.vscode/automation.ps1",
+        ],
+      },
+    },
+  ],
+  "version": "2.0.0",
+}

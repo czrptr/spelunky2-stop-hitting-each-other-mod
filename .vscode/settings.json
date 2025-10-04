@@ -1,0 +1,11 @@
+{
+  "Lua.runtime.version": "Lua 5.4",
+  "Lua.workspace.library": [
+    "${workspaceFolder}/library/overlunky/docs/game_data/spel2.lua",
+    "${workspaceFolder}/library/definitions.lua",
+  ],
+  "[lua]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "sumneko.lua"
+  }
+}
