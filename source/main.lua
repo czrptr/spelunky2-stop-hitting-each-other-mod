@@ -29,95 +29,64 @@ local function is_mount(entity)
   return entity.tamed ~= nil
 end
 
----@param entity_type ENT_TYPE
+---@param type ENT_TYPE
 ---@return boolean
-local function is_exmplosion(entity_type)
+local function is_explosion(type)
   return
-      entity_type == ENT_TYPE.FX_EXPLOSION
-      or entity_type == ENT_TYPE.FX_POWEREDEXPLOSION
-      or entity_type == ENT_TYPE.FX_MODERNEXPLOSION
+      type == ENT_TYPE.FX_EXPLOSION
+      or type == ENT_TYPE.FX_POWEREDEXPLOSION
+      or type == ENT_TYPE.FX_MODERNEXPLOSION
+end
+
+---@param attacker Movable
+---@return boolean?
+local function should_block_player_damage(attacker)
+  if not attacker then
+    return nil -- Allow environmental damage (spikes, lava, etc.)
+  end
+
+  -- Block direct player damage
+  if is_player(attacker) then
+    return false
+  end
+
+  local owner = get_entity(attacker.last_owner_uid)
+  if not is_player(owner) then
+    return nil -- Not player-owned, allow damage
+  end
+
+  -- Arrows from traps should still hurt
+  ---@diagnostic disable-next-line undefined-field
+  if attacker.shot_from_trap then
+    return nil
+  end
+
+  -- Explosions from player actions should still hurt
+  if is_explosion(attacker.type.id) then
+    return nil
+  end
+
+  -- Block all other player-owned damage
+  return false
 end
 
 -- ==============================================================================
 
----@param victim Player
 ---@param attacker Movable
 ---@return boolean?
-local function on_player_pre_damage(victim, attacker)
-  if attacker == nil then
-    return nil -- allow damage from environment
-  end
-
-  if is_player(attacker) then
-    return false
-  end
-
-  if is_player(get_entity(attacker.last_owner_uid)) then
-    ---@diagnostic disable-next-line unknowd_field
-    if attacker.shot_from_trap then
-      return nil -- arrows shot from traps hurt
-    end
-    if is_exmplosion(attacker.type.id) then
-      return nil -- explosions from player caused explosions hurt
-    end
-    return false
-  end
-
-  return nil
-end
-
----@param victim Pet
----@param attacker Movable
----@return boolean?
-local function on_pet_pre_damage(victim, attacker)
-  if attacker == nil then
-    return nil -- allow damage from environment
-  end
-
-  if is_player(attacker) then
-    return false
-  end
-
-  if is_player(get_entity(attacker.last_owner_uid)) then
-    ---@diagnostic disable-next-line unknowd_field
-    if attacker.shot_from_trap then
-      return nil -- arrows shot from traps hurt
-    end
-    if is_exmplosion(attacker.type.id) then
-      return nil -- explosions from player caused explosions hurt
-    end
-    return false
-  end
-
-  return nil
+local function on_player_or_pet_pre_damage(_, attacker)
+  return should_block_player_damage(attacker)
 end
 
 ---@param victim Mount
 ---@param attacker Movable
 ---@return boolean?
 local function on_mount_pre_damage(victim, attacker)
-  if attacker == nil then
-    return nil -- allow damage from environment
+  -- Only protect tamed mounts
+  if not victim.tamed then
+    return nil
   end
-
-  if victim.tamed then
-    if is_player(attacker) then
-      return false
-    end
-
-    if is_player(get_entity(attacker.last_owner_uid)) then
-      ---@diagnostic disable-next-line unknowd_field
-      if attacker.shot_from_trap then
-        return nil -- arrows shot from traps hurt
-      end
-      if is_exmplosion(attacker.type.id) then
-        return nil -- explosions from player caused explosions hurt
-      end
-      return false
-    end
-  end
-
-  return nil
+  return should_block_player_damage(attacker)
 end
 
 ---@param self Movable
@@ -141,9 +110,9 @@ local function on_spawn(entity)
   entity:set_post_pick_up(on_post_pickup)
 
   if is_player(entity) then
-    entity:set_pre_damage(on_player_pre_damage)
+    entity:set_pre_damage(on_player_or_pet_pre_damage)
   elseif options.spare_pets and is_pet(entity) then
-    entity:set_pre_damage(on_pet_pre_damage)
+    entity:set_pre_damage(on_player_or_pet_pre_damage)
   elseif options.spare_mounts and is_mount(entity) then
     entity:set_pre_damage(on_mount_pre_damage)
   end
