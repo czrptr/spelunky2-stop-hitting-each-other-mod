@@ -41,8 +41,9 @@ end
 ---@param attacker Movable
 ---@return boolean?
 local function should_block_player_damage(attacker)
+  -- Allow environmental damage (spikes, lava, etc.)
   if not attacker then
-    return nil -- Allow environmental damage (spikes, lava, etc.)
+    return nil
   end
 
   -- Block direct player damage
@@ -50,9 +51,11 @@ local function should_block_player_damage(attacker)
     return false
   end
 
+  -- Check if projectile/weapon is owned by a player
   local owner = get_entity(attacker.last_owner_uid)
+  -- Not player-owned, allow damage
   if not is_player(owner) then
-    return nil -- Not player-owned, allow damage
+    return nil
   end
 
   -- Arrows from traps should still hurt
@@ -61,12 +64,12 @@ local function should_block_player_damage(attacker)
     return nil
   end
 
-  -- Explosions from player actions should still hurt
+  -- Explosions caused by player action should still hurt
   if is_explosion(attacker.type.id) then
     return nil
   end
 
-  -- Block all other player-owned damage
+  -- Block all other player originating damage
   return false
 end
 
@@ -105,12 +108,11 @@ end
 ---@param self Movable
 ---@param entity Entity
 local function on_post_pickup(self, entity)
-  if entity.shot_from_trap == nil then
-    return
+  ---@diagnostic disable-next-line undefined-field
+  if entity.shot_from_trap ~= nil then
+    ---@cast entity Arrow
+    entity.shot_from_trap = not is_player(self)
   end
-
-  ---@cast entity Arrow
-  entity.shot_from_trap = not is_player(self)
 end
 
 ---@param entity Entity
