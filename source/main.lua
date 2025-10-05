@@ -12,21 +12,21 @@ meta = {
 ---@return boolean
 local function is_player(entity)
   ---@diagnostic disable-next-line undefined-field
-  return entity.get_short_name ~= nil
+  return entity ~= nil and entity.get_short_name ~= nil
 end
 
 ---@param entity Entity
 ---@return boolean
 local function is_pet(entity)
   ---@diagnostic disable-next-line undefined-field
-  return entity.petted_counter ~= nil
+  return entity ~= nil and entity.petted_counter ~= nil
 end
 
 ---@param entity Entity
 ---@return boolean
 local function is_mount(entity)
   ---@diagnostic disable-next-line undefined-field
-  return entity.tamed ~= nil
+  return entity ~= nil and entity.tamed ~= nil
 end
 
 ---@param type ENT_TYPE
