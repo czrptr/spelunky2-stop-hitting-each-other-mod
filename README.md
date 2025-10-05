@@ -10,6 +10,9 @@ The "Stop Hitting Each Other" mod disables friendly fire and self-damage for pla
   - Players can't hurt pets (default: true)
   - Players can't hurt tamed mounts (default: true)
 
+### Planned:
+- **Online multiplayer support** (compatibility untested, let me know if it works)
+
 ## Changelog
 
 ### 1.0
