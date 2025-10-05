@@ -72,6 +72,19 @@ end
 
 -- ==============================================================================
 
+---@param save_context SaveContext
+local function save_options(save_context)
+  save_context:save(json.encode(options))
+end
+
+---@param load_context LoadContext
+local function load_options(load_context)
+  local options_str = load_context:load()
+  if options_str ~= '' then
+    options = json.decode(options_str)
+  end
+end
+
 ---@param attacker Movable
 ---@return boolean?
 local function on_player_or_pet_pre_damage(_, attacker)
@@ -131,5 +144,8 @@ register_option_bool(
   "Players can't damage tamed mounts",
   true
 )
+
+set_callback(save_options, ON.SAVE)
+set_callback(load_options, ON.LOAD)
 
 set_post_entity_spawn(on_spawn, SPAWN_TYPE.ANY, MASK.ANY)
