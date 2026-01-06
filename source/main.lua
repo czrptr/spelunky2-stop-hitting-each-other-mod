@@ -51,10 +51,20 @@ local function should_block_player_damage(attacker)
     return false
   end
 
+  -- Block damage from player ridden mounts
   if attacker.type.id == ENT_TYPE.ITEM_TURKEY_NECK then
     local turkey = get_entity(attacker.last_owner_uid) --[[@as Mount]]
     local rider = get_entity(turkey.rider_uid)
     return not is_player(rider)
+  end
+
+  if is_mount(attacker) then
+    ---@cast attacker Mount
+    if attacker.rider_uid ~= -1 then
+      local rider = get_entity(attacker.rider_uid)
+      return not is_player(rider)
+    end
+    return nil
   end
 
   -- Check if projectile/weapon is owned by a player
