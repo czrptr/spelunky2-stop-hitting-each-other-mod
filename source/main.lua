@@ -114,6 +114,19 @@ end
 ---@param attacker Movable
 ---@return boolean?
 local function on_mount_pre_damage(victim, attacker)
+  -- Allow tamed turkeys to be cooked
+  if victim.type.id == ENT_TYPE.MOUNT_TURKEY then
+    if attacker.type.id == ENT_TYPE.ITEM_TORCH
+        and (attacker --[[@as Torch]]).is_lit then
+      return nil
+    elseif attacker.type.id == ENT_TYPE.ITEM_WOODEN_ARROW
+        and (attacker --[[@as Arrow]]).is_on_fire then
+      return nil
+    elseif attacker.type.id == ENT_TYPE.ITEM_WHIP and
+        (attacker --[[@as Whip]]).flaming then
+      return nil
+    end
+  end
   -- Only protect tamed mounts
   if not victim.tamed then
     return nil
