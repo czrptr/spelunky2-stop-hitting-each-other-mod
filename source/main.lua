@@ -105,9 +105,40 @@ local function on_mount_pre_damage(victim, attacker)
   return should_block_player_damage(attacker)
 end
 
+---@param victim Movable
+---@param attacker Movable
+---@return boolean?
+local function on_item_pre_damage(attacker, victim)
+  if victim.user_data ~= nil
+      and victim.user_data.holder_uid ~= -1
+      and is_player(get_entity(victim.user_data.holder_uid)) then
+    return attacker.last_owner_uid == -1
+  end
+  return nil
+end
+
+---@param self Player
+---@return boolean
+local function on_player_pre_drop(self)
+  local held_entity = get_entity(self.holding_uid)
+  held_entity.user_data.holder_uid = -1
+  return false
+end
+
+---@param self Player
+---@param entity Entity
+local function on_player_post_pickup(self, entity)
+  -- guard against other mods which use user_data
+  if entity.user_data == nil then
+    ---@diagnostic disable-next-line: missing-fields
+    entity.user_data = {}
+  end
+  entity.user_data.holder_uid = self.uid
+end
+
 ---@param self Movable
 ---@param entity Entity
-local function on_post_pickup(self, entity)
+local function on_item_post_pickup(self, entity)
   ---@diagnostic disable-next-line undefined-field
   if entity.shot_from_trap ~= nil then
     ---@cast entity Arrow
@@ -122,14 +153,18 @@ local function on_spawn(entity)
     return
   end
   ---@cast entity Movable
-  entity:set_post_pick_up(on_post_pickup)
 
   if is_player(entity) then
+    entity:set_post_pick_up(on_player_post_pickup)
+    entity:set_pre_drop(on_player_pre_drop)
     entity:set_pre_damage(on_player_or_pet_pre_damage)
   elseif options.spare_pets and is_pet(entity) then
     entity:set_pre_damage(on_player_or_pet_pre_damage)
   elseif options.spare_mounts and is_mount(entity) then
     entity:set_pre_damage(on_mount_pre_damage)
+  elseif test_flag(entity.flags, ENT_FLAG.PICKUPABLE) then
+    entity:set_post_pick_up(on_item_post_pickup)
+    entity:set_pre_thrown_into(on_item_pre_damage)
   end
 end
 
