@@ -15,6 +15,12 @@ The "Stop Hitting Each Other" mod disables friendly fire and self-damage for pla
 
 ## Changelog
 
+### 1.1
+- **Added:**
+  - Player thrown items will no longer interact with items held by other players<br>(ex: you can't break the cursed pot from another players hand)
+  - Mounts ridden by players don't deal damage to other players<br>(mech explosions still do damage)
+  - Tamed turkeys can be cooked using, lit torches, lit arrows or fire whips
+
 ### 1.0
 - **Added:**
   - Friendly fire and self damage blocking system

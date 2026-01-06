@@ -1,7 +1,7 @@
 -- STOP HITTING EACH OTHER MOD
 meta = {
   name = "Stop hitting each other",
-  version = "1.0",
+  version = "1.1",
   description = "No friendly or self damage",
   author = "Quasar",
 }
